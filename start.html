@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Project 3</title>
+    <meta charset="UTF-8">
+	<script>
+	//user will select: types of location / range
+	//user can also: Keyword search
+	//we will get: geolocation for base Lat&Long
+	
+	//will take the lat&long and the type and range, add them to the Api URL
+	//if there is a keyword in the text box, include that as well.
+	//var url = "https://maps.googleapis.com/maps/api/place/radarsearch/json?location=48.859294,2.347589&radius=5000&types=food|cafe&sensor=false&keyword=vegetarian&key=AIzaSyBDT5cm6rCOzEwz2vmn-jemCjtWDFEQhZ4"
+	
+	var Api_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyBDT5cm6rCOzEwz2vmn-jemCjtWDFEQhZ4&sensor=false&";
+	var location;
+	var radius;
+	var keyword;
+	
+	function getData(){
+	// build up our URL string
+		if(location == null){
+			var location = document.querySelector("#searchDistance") ;
+			var r=";
+		}
+		
+		// get value of form field
+		var value = document.querySelector("#searchterm").value;
+		
+		// get rid of any leading and trailing spaces
+		value = value.trim();
+		
+		// if there's no band to search then bail out of the function (return does this)
+		if(value.length < 1) return;
+		
+		document.querySelector("#content").innerHTML = "<b>Searching for " + value + "</b>";
+		
+		// replace spaces the user typed in the middle of the term with %20
+		// %20 is the hexadecimal value for a space
+		value = encodeURI(value); 
+		
+		// finally, add the artist name to the end of the string
+		url += value;
+		
+		// call the web service, and download the file
+		console.log("loading " + url);
+		$.getJSON(url).done(function(data){jsonLoaded(data);});
+	}
+	
+	function jsonLoaded(obj){
+	
+	}
+	</script>
+</head>
+<body>
+</body>
+</html>
