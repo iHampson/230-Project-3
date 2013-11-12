@@ -13,15 +13,32 @@
 	//var url = "https://maps.googleapis.com/maps/api/place/radarsearch/json?location=48.859294,2.347589&radius=5000&types=food|cafe&sensor=false&keyword=vegetarian&key=AIzaSyBDT5cm6rCOzEwz2vmn-jemCjtWDFEQhZ4"
 	
 	var Api_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyBDT5cm6rCOzEwz2vmn-jemCjtWDFEQhZ4&sensor=false&";
-	var location;
+	var lat;
+	var lon;
 	var radius;
 	var keyword;
 	
+	function getLocation(){
+		if (navigator.geolocation){
+			navigattor.geolocation.getCurrentPosition(showPosition);
+		}
+		else{
+			var temp = '<h1>Your browser does not support GeoLocation</h1>'
+			doucument.querySelector("text").innerHTML = temp;
+		}
+	}
+	
+	function showPosition(position){
+		lat = position.coords.latitude;
+		lon = position.coords.longitude;
+	}
+	
 	function getData(){
 	// build up our URL string
-		if(location == null){
-			var location = document.querySelector("#searchDistance") ;
-			var r=";
+		if(lat == null || lon == null){
+			var lat= document.querySelector("lat");
+			var lon = document.querySelector("lon");
+			var radius=document.querySelector("#searchDistance");;
 		}
 		
 		// get value of form field
@@ -53,5 +70,6 @@
 	</script>
 </head>
 <body>
+<h1 id="text"></h1>
 </body>
 </html>
