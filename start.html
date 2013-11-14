@@ -3,7 +3,10 @@
 <head>
 	<title>Project 3</title>
     <meta charset="UTF-8">
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
 	<script>
+	
 	//user will select: types of location / range
 	//user can also: Keyword search
 	//we will get: geolocation for base Lat&Long
@@ -12,64 +15,145 @@
 	//if there is a keyword in the text box, include that as well.
 	//var url = "https://maps.googleapis.com/maps/api/place/radarsearch/json?location=48.859294,2.347589&radius=5000&types=food|cafe&sensor=false&keyword=vegetarian&key=AIzaSyBDT5cm6rCOzEwz2vmn-jemCjtWDFEQhZ4"
 	
-	var Api_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyBDT5cm6rCOzEwz2vmn-jemCjtWDFEQhZ4&sensor=false&";
+	var Places_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyBDT5cm6rCOzEwz2vmn-jemCjtWDFEQhZ4&sensor=false&";
 	var lat;
 	var lon;
 	var radius;
 	var keyword;
+	var address;
+	var radius;
 	
+	window.onload = init;
+	function init(){
+		document.querySelector("#subButton").onclick = getPlaces;
+		//getLocation();
+	}
+
 	function getLocation(){
+	console.log("getLocation called");
 		if (navigator.geolocation){
-			navigattor.geolocation.getCurrentPosition(showPosition);
+			navigator.geolocation.getCurrentPosition(showPosition);
 		}
 		else{
-			var temp = '<h1>Your browser does not support GeoLocation</h1>'
-			doucument.querySelector("text").innerHTML = temp;
+			var temp = "<h1>Your browser does not support GeoLocation</h1>";
+			document.querySelector('#text').innerHTML = temp;
 		}
 	}
-	
 	function showPosition(position){
 		lat = position.coords.latitude;
 		lon = position.coords.longitude;
+		console.log("Lat and Lon: " +lat+", "+lon);
 	}
-	
-	function getData(){
+	//Called when submit is clicked
+	function getPlaces(){
 	// build up our URL string
-		if(lat == null || lon == null){
-			var lat= document.querySelector("lat");
-			var lon = document.querySelector("lon");
-			var radius=document.querySelector("#searchDistance");;
-		}
+	//console.log("getPlaces called");
+		//if(lat == undefined || lon == undefined){
+			checkAddress();
+			radius=document.querySelector("#radius").value*1000;
 		
+		//if(lat != undefined && lon != undefined){
 		// get value of form field
-		var value = document.querySelector("#searchterm").value;
+		//var value = document.querySelector("#searchterm").value;
 		
 		// get rid of any leading and trailing spaces
-		value = value.trim();
+		//value = value.trim();
 		
 		// if there's no band to search then bail out of the function (return does this)
-		if(value.length < 1) return;
+		//if(value.length < 1) return;
 		
-		document.querySelector("#content").innerHTML = "<b>Searching for " + value + "</b>";
+		//document.querySelector("#content").innerHTML = "<b>Searching for " + value + "</b>";
 		
 		// replace spaces the user typed in the middle of the term with %20
 		// %20 is the hexadecimal value for a space
-		value = encodeURI(value); 
-		
+		//value = encodeURI(value); 
+		console.log("Lat and Lon: " +lat+", "+lon);
 		// finally, add the artist name to the end of the string
-		url += value;
+		//url += value;
+		Places_url += "location="+lat+","+lon+"&radius="+radius;
+		//Places_url += "&types="+type;
 		
 		// call the web service, and download the file
-		console.log("loading " + url);
-		$.getJSON(url).done(function(data){jsonLoaded(data);});
+		console.log("loading " + Places_url);
+		$.getJSON(Places_url).done(function(data){placesLoaded(data);});
+	
+			//}}
+		
 	}
 	
-	function jsonLoaded(obj){
-	
+	function placesLoaded(obj){
+		console.log("places Loaded");
+		if(obj.error || obj.results==undefined || obj.status != "OK")
+		{
+			document.querySelector("#text").innerHTML = "Results not found.";
+			console.log(obj.status);
+		}
+		else{
+			var results = obj.results;
+			
+			for(var i=0;i<results.length;i++){
+				var name = results[i].name;
+				var placeAddress = results[i].formatted_address;
+				var rating = results[i].rating;
+				var line = "<li>Name: " + name + "<br/> Address: " + address + "<br/>Rating: " + rating + "</li>"
+			}
+		}
 	}
+	//Called if needed no Geolocation Data
+	function checkAddress(){
+		address = document.querySelector("#address").value;
+		address.trim();
+		var pieces = address.split(" ");
+		address= "";
+		for(var i=0;i<pieces.length;i++){
+			if(i<pieces.length-1){
+				address +=pieces[i] + "+";
+			}
+			else{
+				address += pieces[i];
+			}
+		}
+		getCoords();
+	}
+	function getCoords(){
+		// build up our URL string
+		var GeoCode_url = "http://maps.googleapis.com/maps/api/geocode/json?sensor=false&address=";
+			
+		//document.querySelector("#content").innerHTML = "<b>Searching for " + value + "</b>";
+				
+		// finally, add the artist name to the end of the string
+		GeoCode_url += address;
+		
+		// call the web service, and download the file
+		//console.log("loading " + url);
+		$.getJSON(GeoCode_url).done(function(data){locationLoaded(data);});
+	}
+	function locationLoaded(obj){
+		if(obj.error || obj.results[0] == undefined|| obj.results[0].geometry == undefined){
+			document.querySelector("#text").innerHTML = "Results not found.";
+			console.log(obj.status);
+		}
+		else{
+			var results = obj.results[0].geometry.location;
+			lat = results.lat;
+			lon = results.lng;
+			console.log("location loaded, Lat and Lon: " +lat+", "+lon);
+		}
+	}
+	
 	</script>
 </head>
 <body>
-<h1 id="text"></h1>
+<h1 id="text">Near You!</h1>
+<select id = "radius">
+<option value = "5">5 km</option>
+<option value = "10">10 km</option>
+<option value = "15">15 km</option>
+<option value = "20">20 km</option>
+</select>
+<input type="text" id = "address" size="40" value="1 lomb memorial dr rochester ny 14623"/>
+<button type="button" id="subButton">Submit</button>
+
+<div id="mapCanvas"></div>
 </body>
 </html>
